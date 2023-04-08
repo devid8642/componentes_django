@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "componenetes-django"
+version = "0.1.0"
+description = "Conjunto de componentes django genéricos."
+authors = ["devid <nnick4673@gmail.com>"]
+readme = "README.md"
+packages = [{include = "componenetes_django"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^4.2"
+django-environ = "^0.10.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
