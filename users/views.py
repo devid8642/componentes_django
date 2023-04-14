@@ -1,11 +1,10 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import make_password
 from .models import MyUser
 from .serializers import MyUserSerializer
+from .utils import data_user_validation
 
 @api_view(['GET'])
 def users(request):
@@ -17,18 +16,9 @@ def users(request):
 def users_create(request):
     data = request.data
     expected_data = ['username', 'email', 'password']
-    
-    for i in expected_data:
-        if i not in data.keys():
-            return Response({'detail': 'expected data: username, email and password'}, status = status.HTTP_400_BAD_REQUEST)
-    del expected_data
-
-    try:
-        validate_email(data['email'])
-        validate_password(password = data['password'])
-    except ValidationError as e:
-        return Response({'detail': e}, status = status.HTTP_400_BAD_REQUEST)
-
+    validation = data_user_validation(data, expected_data)
+    if validation != None:
+        return Response({'detail': validation}, status = status.HTTP_400_BAD_REQUEST)
     user = MyUser.objects.create_user(
             username = request.data['username'],
             email = request.data['email'],
@@ -36,3 +26,28 @@ def users_create(request):
     )
     serializer = MyUserSerializer(user)
     return Response(serializer.data, status = status.HTTP_201_CREATED)
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def users_detail(request, id):
+    try:
+        user = MyUser.objects.get(id = id)
+    except MyUser.DoesNotExist:
+        return Response(status = status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        serializer = MyUserSerializer(user)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        data = request.data
+        expected_data = ['username', 'email', 'password']
+        validation = data_user_validation(data, expected_data)
+        if validation != None:
+            return Response({'detail': validation}, status = status.HTTP_400_BAD_REQUEST)
+        user.username = data['username']
+        user.email = data['email']
+        user.password = make_password(data['password'])
+        user.save()
+        serializer = MyUserSerializer(user)
+        return Response(serializer.data)
+    elif request.method == 'DELETE':
+        user.delete()
+        return Response(status = status.HTTP_204_NO_CONTENT)
