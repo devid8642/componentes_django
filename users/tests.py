@@ -1,6 +1,7 @@
 import pytest
 from .models import MyUser
 from django.contrib.auth.hashers import check_password
+from django.utils import timezone
 
 
 @pytest.mark.django_db
@@ -15,6 +16,7 @@ def test_user_create():
     assert user.email == 'devid@devid.com'
     assert user.is_active == True
     assert user.is_staff == False
+    assert user.date_joined.date() == timezone.now().date()
     assert check_password(password = 'devid3939!', encoded = user.password) == True 
 
 @pytest.mark.django_db
@@ -29,4 +31,5 @@ def test_superuser_create():
     assert user.email == 'admin@admin.com'
     assert user.is_active == True
     assert user.is_staff == True
+    assert user.date_joined.date() == timezone.now().date()
     assert check_password(password = 'asuna333@@', encoded = user.password) == True
