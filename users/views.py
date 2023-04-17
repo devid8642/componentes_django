@@ -10,7 +10,7 @@ from .utils import data_user_validation
 def users(request):
     users = MyUser.objects.all()
     serializer = MyUserSerializer(users, many = True)
-    return Response(serializer.data)
+    return Response(serializer.data, status = status.HTTP_200_OK)
 
 @api_view(['POST'])
 def users_create(request):
