@@ -13,5 +13,10 @@ def data_user_validation(data, expected_data):
         validate_password(password = data['password'])
     except ValidationError as e:
         return e
+    else:
+        if len(data['email']) > 255:
+            return 'Email invalid'
+        elif len(data['username']) > 255:
+            return 'Username invalid'
     
     return None
