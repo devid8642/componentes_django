@@ -27,7 +27,7 @@ def users_create(request):
     serializer = MyUserSerializer(user)
     return Response(serializer.data, status = status.HTTP_201_CREATED)
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'POST', 'DELETE'])
 def users_detail(request, id):
     try:
         user = MyUser.objects.get(id = id)
@@ -36,7 +36,7 @@ def users_detail(request, id):
     if request.method == 'GET':
         serializer = MyUserSerializer(user)
         return Response(serializer.data)
-    elif request.method == 'PUT':
+    elif request.method == 'POST':
         data = request.data
         expected_data = ['username', 'email', 'password']
         validation = data_user_validation(data, expected_data)
@@ -46,8 +46,9 @@ def users_detail(request, id):
         user.email = data['email']
         user.password = make_password(data['password'])
         user.save()
+        user = MyUser.objects.get(id = id)
         serializer = MyUserSerializer(user)
-        return Response(serializer.data)
+        return Response(serializer.data, status = status.HTTP_200_OK)
     elif request.method == 'DELETE':
         user.delete()
         return Response(status = status.HTTP_204_NO_CONTENT)

@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.urls import reverse
 from rest_framework.renderers import JSONRenderer
 
-
 @pytest.mark.django_db
 def test_user_create():
     MyUser.objects.create_user(
@@ -71,13 +70,61 @@ def test_user_create(client):
     assert response.content == expected_response
 
 @pytest.mark.django_db
-def test_user_detail_get():
-    pass
+def test_user_detail_get(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    user = MyUser.objects.get(id = 1)
+    serializer = MyUserSerializer(user)
+    url = reverse('users_detail', args = [1])
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.content == JSONRenderer().render(serializer.data)
+
 
 @pytest.mark.django_db
-def test_user_detail_put():
-    pass
+def test_user_detail_post(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    url = reverse('users_detail', args = [1])
+    response = client.post(url, {
+        'username': 'roberto',
+        'email': 'roberto@gmail.com',
+        'password': 'robertoda8721!@'
+    })
+    user = MyUser.objects.get(id = 1)
+    serializer = MyUserSerializer(user)
+    assert response.status_code == 200
+    assert response.content == JSONRenderer().render(serializer.data)
 
 @pytest.mark.django_db
-def test_user_detail_delete():
-    pass
+def test_user_detail_delete(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    url = reverse('users_detail', args = [1])
+    response = client.delete(url)
+    assert response.status_code == 204
+    assert MyUser.objects.all().count() == 1
