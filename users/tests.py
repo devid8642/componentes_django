@@ -37,7 +37,7 @@ def test_superuser_create():
     assert check_password(password = 'asuna333@@', encoded = user.password) == True
 
 @pytest.mark.django_db
-def test_users_list(client):
+def test_users_list_from_staff_user(client):
     MyUser.objects.create_user(
         username = 'devid',
         email = 'devid@devid.com',
@@ -51,12 +51,30 @@ def test_users_list(client):
     users = MyUser.objects.all()
     serializer = MyUserSerializer(users, many = True)
     url = reverse('users')
+    client.login(email = 'admin@admin.com', password = 'asuna333@@')
     response = client.get(url)
     assert response.status_code == 200
     assert response.content == JSONRenderer().render(serializer.data)
 
 @pytest.mark.django_db
-def test_user_create(client):
+def test_users_list_from_common_user(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    url = reverse('users')
+    client.login(email = 'devid@devid.com', password = 'devid3939!')
+    response = client.get(url)
+    assert response.status_code == 403
+
+@pytest.mark.django_db
+def test_user_create_view(client):
     url = reverse('users_create')
     response = client.post(url, {
         'username': 'devid',
@@ -70,7 +88,7 @@ def test_user_create(client):
     assert response.content == expected_response
 
 @pytest.mark.django_db
-def test_user_detail_get(client):
+def test_user_detail_get_from_staff_user(client):
     MyUser.objects.create_user(
         username = 'devid',
         email = 'devid@devid.com',
@@ -84,13 +102,55 @@ def test_user_detail_get(client):
     user = MyUser.objects.get(id = 1)
     serializer = MyUserSerializer(user)
     url = reverse('users_detail', args = [1])
+    client.login(email = 'admin@admin.com', password = 'asuna333@@')
     response = client.get(url)
     assert response.status_code == 200
     assert response.content == JSONRenderer().render(serializer.data)
 
+@pytest.mark.django_db
+def test_user_detail_get_from_common_user_same_id(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    user = MyUser.objects.get(id = 1)
+    serializer = MyUserSerializer(user)
+    url = reverse('users_detail', args = [1])
+    client.login(email = 'devid@devid.com', password = 'devid3939!')
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.content == JSONRenderer().render(serializer.data)
 
 @pytest.mark.django_db
-def test_user_detail_post(client):
+def test_user_detail_get_from_common_user_different_id(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_user(
+        username = 'teste',
+        email = 'teste@teste.com',
+        password = 'teste3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    url = reverse('users_detail', args = [1])
+    client.login(email = 'teste@teste.com', password = 'teste3939!')
+    response = client.get(url)
+    assert response.status_code == 403
+
+@pytest.mark.django_db
+def test_user_detail_post_from_staff_user(client):
     MyUser.objects.create_user(
         username = 'devid',
         email = 'devid@devid.com',
@@ -102,6 +162,7 @@ def test_user_detail_post(client):
         password = 'asuna333@@'
     )
     url = reverse('users_detail', args = [1])
+    client.login(email = 'admin@admin.com', password = 'asuna333@@')
     response = client.post(url, {
         'username': 'roberto',
         'email': 'roberto@gmail.com',
@@ -113,7 +174,7 @@ def test_user_detail_post(client):
     assert response.content == JSONRenderer().render(serializer.data)
 
 @pytest.mark.django_db
-def test_user_detail_delete(client):
+def test_user_detail_post_from_common_user_same_id(client):
     MyUser.objects.create_user(
         username = 'devid',
         email = 'devid@devid.com',
@@ -125,6 +186,101 @@ def test_user_detail_delete(client):
         password = 'asuna333@@'
     )
     url = reverse('users_detail', args = [1])
+    client.login(email = 'devid@devid.com', password = 'devid3939!')
+    response = client.post(url, {
+        'username': 'roberto',
+        'email': 'roberto@gmail.com',
+        'password': 'robertoda8721!@'
+    })
+    user = MyUser.objects.get(id = 1)
+    serializer = MyUserSerializer(user)
+    assert response.status_code == 200
+    assert response.content == JSONRenderer().render(serializer.data)
+
+@pytest.mark.django_db
+def test_user_detail_post_from_common_user_different_id(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    MyUser.objects.create_user(
+        username = 'teste',
+        email = 'teste@teste.com',
+        password = 'teste3939!'
+    )
+    url = reverse('users_detail', args = [1])
+    client.login(email = 'teste@teste.com', password = 'teste3939!')
+    pre_user = MyUser.objects.get(id = 1)
+    response = client.post(url, {
+        'username': 'teste',
+        'email': 'teste@teste.com',
+        'password': 'teste3939!'
+    })
+    pos_user = MyUser.objects.get(id = 1)
+    assert response.status_code == 403
+    assert pre_user == pos_user
+
+@pytest.mark.django_db
+def test_user_detail_delete_from_staff_user(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    url = reverse('users_detail', args = [1])
+    client.login(email = 'admin@admin.com', password = 'asuna333@@')
     response = client.delete(url)
     assert response.status_code == 204
     assert MyUser.objects.all().count() == 1
+
+@pytest.mark.django_db
+def test_user_detail_delete_from_common_user_same_id(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    url = reverse('users_detail', args = [1])
+    client.login(email = 'devid@devid.com', password = 'devid3939!')
+    response = client.delete(url)
+    assert response.status_code == 204
+    assert MyUser.objects.all().count() == 1
+
+@pytest.mark.django_db
+def test_user_detail_delete_from_common_user_different_id(client):
+    MyUser.objects.create_user(
+        username = 'devid',
+        email = 'devid@devid.com',
+        password = 'devid3939!'
+    )
+    MyUser.objects.create_superuser(
+        username = 'admin',
+        email = 'admin@admin.com',
+        password = 'asuna333@@'
+    )
+    MyUser.objects.create_user(
+        username = 'teste',
+        email = 'teste@teste.com',
+        password = 'teste3939!'
+    )
+    url = reverse('users_detail', args = [1])
+    client.login(email = 'teste@teste.com', password = 'teste3939!')
+    response = client.delete(url)
+    assert response.status_code == 403
+    assert MyUser.objects.all().count() == 3

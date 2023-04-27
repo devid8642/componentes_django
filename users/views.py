@@ -63,7 +63,7 @@ def users_detail(request, id):
             user.delete()
             return Response(status = status.HTTP_204_NO_CONTENT)
     else:
-        return Response({'detail': "You do not have permissions to access another user's data"}, status = status.HTTP_401_UNAUTHORIZED)
+        return Response({'detail': "You do not have permissions to access another user's data"}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
