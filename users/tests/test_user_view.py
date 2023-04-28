@@ -1,5 +1,5 @@
 import pytest
-from users.utils import setup_db
+from utils import setup_db
 from users.models import MyUser
 from users.serializers import MyUserSerializer
 from django.urls import reverse
