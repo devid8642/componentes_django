@@ -35,7 +35,7 @@ def users_create(request):
                 password = request.data['password']
         )
     else:
-        return Response({'detail': 'User already exists'}, status = status.HTTP_403_FORBIDDEN)
+        return Response({'detail': 'Usuário já existe.'}, status = status.HTTP_403_FORBIDDEN)
     serializer = MyUserSerializer(user)
     return Response(serializer.data, status = status.HTTP_201_CREATED)
 
@@ -68,7 +68,7 @@ def users_detail(request, id):
             user.delete()
             return Response(status = status.HTTP_204_NO_CONTENT)
     else:
-        return Response({'detail': "You do not have permissions to access another user's data"}, status = status.HTTP_403_FORBIDDEN)
+        return Response({'detail': 'Você não tem permissões para acessar os dados de outro usuário.'}, status = status.HTTP_403_FORBIDDEN)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

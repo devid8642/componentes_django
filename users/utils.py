@@ -17,9 +17,9 @@ def data_user_validation(data, expected_data):
         return e
     else:
         if len(data['email']) > 255:
-            return 'Email invalid'
+            return 'Email inválido'
         elif len(data['username']) > 255:
-            return 'Username invalid'
+            return 'Usuário Inválido'
     
     return None
 

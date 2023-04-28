@@ -21,6 +21,13 @@ class TestUserListView:
         client.login(email = 'devid@devid.com', password = 'devid3939!')
         response = client.get(url)
         assert response.status_code == 403
+        assert response.content == JSONRenderer().render({'detail': 'Você não tem permissão para executar essa ação.'})
+
+    def test_from_anonymous_user(self, client, setup_db):
+        url = reverse('users')
+        response = client.get(url)
+        assert response.status_code == 403
+        assert response.content == JSONRenderer().render({'detail': 'As credenciais de autenticação não foram fornecidas.'})
 
 @pytest.mark.django_db
 class TestUserCreateView:
@@ -37,7 +44,7 @@ class TestUserCreateView:
         expected_response = JSONRenderer().render(serializer.data)
         assert response.content == expected_response
     
-    def test_create_view_when_exist_user(self, client, setup_db):
+    def test_view_when_exist_user(self, client, setup_db):
         url = reverse('users_create')
         response = client.post(url, {
             'username': 'devid',
@@ -45,7 +52,7 @@ class TestUserCreateView:
             'password': 'devid3939!'
         })
         assert response.status_code == 403
-        assert response.content == JSONRenderer().render({'detail': 'User already exists'})
+        assert response.content == JSONRenderer().render({'detail': 'Usuário já existe.'})
 
 @pytest.mark.django_db
 class TestGetUserDetailView:
@@ -72,6 +79,7 @@ class TestGetUserDetailView:
         client.login(email = 'teste@teste.com', password = 'teste3939!')
         response = client.get(url)
         assert response.status_code == 403
+        assert response.content == JSONRenderer().render({'detail': 'Você não tem permissões para acessar os dados de outro usuário.'})
 
 @pytest.mark.django_db
 class TestPostUserDetailView:
@@ -113,6 +121,7 @@ class TestPostUserDetailView:
         pos_user = MyUser.objects.get(id = 1)
         assert response.status_code == 403
         assert pre_user == pos_user
+        assert response.content == JSONRenderer().render({'detail': 'Você não tem permissões para acessar os dados de outro usuário.'})
 
 @pytest.mark.django_db
 class TestDeleteUserDetailView:
@@ -136,3 +145,4 @@ class TestDeleteUserDetailView:
         response = client.delete(url)
         assert response.status_code == 403
         assert MyUser.objects.all().count() == 3
+        assert response.content == JSONRenderer().render({'detail': 'Você não tem permissões para acessar os dados de outro usuário.'})

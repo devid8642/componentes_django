@@ -39,10 +39,10 @@ class LoginSerializer(serializers.Serializer):
                 password = password
             )
             if not user:
-                msg = 'Access denied: wrong email or password'
+                msg = 'Email ou senha incorretos.'
                 raise serializers.ValidationError(msg, code = 'authorization')
         else:
-            msg = 'Both "email" and "password" are required'
+            msg = 'Email e senha são requeridos.'
             raise serializers.ValidationError(msg, code = 'authorization')
         attrs['user'] = user
         return attrs
