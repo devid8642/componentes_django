@@ -1,4 +1,5 @@
 import pytest
+from users.utils import setup_db
 from users.models import MyUser
 from users.serializers import MyUserSerializer
 from django.urls import reverse
@@ -6,17 +7,7 @@ from rest_framework.renderers import JSONRenderer
 
 @pytest.mark.django_db
 class TestUserListView:
-    def test_from_staff_user(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
+    def test_from_staff_user(self, client, setup_db):
         users = MyUser.objects.all()
         serializer = MyUserSerializer(users, many = True)
         url = reverse('users')
@@ -25,17 +16,7 @@ class TestUserListView:
         assert response.status_code == 200
         assert response.content == JSONRenderer().render(serializer.data)
 
-    def test_from_common_user(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
+    def test_from_common_user(self, client, setup_db):
         url = reverse('users')
         client.login(email = 'devid@devid.com', password = 'devid3939!')
         response = client.get(url)
@@ -58,17 +39,7 @@ class TestUserCreateView:
 
 @pytest.mark.django_db
 class TestGetUserDetailView:
-    def test_from_staff_user(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
+    def test_from_staff_user(self, client, setup_db):
         user = MyUser.objects.get(id = 1)
         serializer = MyUserSerializer(user)
         url = reverse('users_detail', args = [1])
@@ -77,17 +48,7 @@ class TestGetUserDetailView:
         assert response.status_code == 200
         assert response.content == JSONRenderer().render(serializer.data)
     
-    def test_from_common_user_same_id(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
+    def test_from_common_user_same_id(self, client, setup_db):
         user = MyUser.objects.get(id = 1)
         serializer = MyUserSerializer(user)
         url = reverse('users_detail', args = [1])
@@ -96,22 +57,7 @@ class TestGetUserDetailView:
         assert response.status_code == 200
         assert response.content == JSONRenderer().render(serializer.data)
     
-    def test_from_common_user_different_id(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_user(
-            username = 'teste',
-            email = 'teste@teste.com',
-            password = 'teste3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
+    def test_from_common_user_different_id(self, client, setup_db):
         url = reverse('users_detail', args = [1])
         client.login(email = 'teste@teste.com', password = 'teste3939!')
         response = client.get(url)
@@ -119,17 +65,7 @@ class TestGetUserDetailView:
 
 @pytest.mark.django_db
 class TestPostUserDetailView:
-    def test_from_staff_user(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
+    def test_from_staff_user(self, client, setup_db):
         url = reverse('users_detail', args = [1])
         client.login(email = 'admin@admin.com', password = 'asuna333@@')
         response = client.post(url, {
@@ -142,17 +78,7 @@ class TestPostUserDetailView:
         assert response.status_code == 200
         assert response.content == JSONRenderer().render(serializer.data)
 
-    def test_from_common_user_same_id(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
+    def test_from_common_user_same_id(self, client, setup_db):
         url = reverse('users_detail', args = [1])
         client.login(email = 'devid@devid.com', password = 'devid3939!')
         response = client.post(url, {
@@ -165,22 +91,7 @@ class TestPostUserDetailView:
         assert response.status_code == 200
         assert response.content == JSONRenderer().render(serializer.data)
 
-    def test_from_common_user_different_id(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
-        MyUser.objects.create_user(
-            username = 'teste',
-            email = 'teste@teste.com',
-            password = 'teste3939!'
-        )
+    def test_from_common_user_different_id(self, client, setup_db):
         url = reverse('users_detail', args = [1])
         client.login(email = 'teste@teste.com', password = 'teste3939!')
         pre_user = MyUser.objects.get(id = 1)
@@ -195,56 +106,21 @@ class TestPostUserDetailView:
 
 @pytest.mark.django_db
 class TestDeleteUserDetailView:
-    def test_from_staff_user(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
+    def test_from_staff_user(self, client, setup_db):
         url = reverse('users_detail', args = [1])
         client.login(email = 'admin@admin.com', password = 'asuna333@@')
         response = client.delete(url)
         assert response.status_code == 204
-        assert MyUser.objects.all().count() == 1
+        assert MyUser.objects.all().count() == 2
 
-    def test_from_common_user_same_id(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
+    def test_from_common_user_same_id(self, client, setup_db):
         url = reverse('users_detail', args = [1])
         client.login(email = 'devid@devid.com', password = 'devid3939!')
         response = client.delete(url)
         assert response.status_code == 204
-        assert MyUser.objects.all().count() == 1
+        assert MyUser.objects.all().count() == 2
 
-    def test_from_common_user_different_id(self, client):
-        MyUser.objects.create_user(
-            username = 'devid',
-            email = 'devid@devid.com',
-            password = 'devid3939!'
-        )
-        MyUser.objects.create_superuser(
-            username = 'admin',
-            email = 'admin@admin.com',
-            password = 'asuna333@@'
-        )
-        MyUser.objects.create_user(
-            username = 'teste',
-            email = 'teste@teste.com',
-            password = 'teste3939!'
-        )
+    def test_from_common_user_different_id(self, client, setup_db):
         url = reverse('users_detail', args = [1])
         client.login(email = 'teste@teste.com', password = 'teste3939!')
         response = client.delete(url)
