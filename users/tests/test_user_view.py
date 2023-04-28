@@ -36,6 +36,16 @@ class TestUserCreateView:
         serializer = MyUserSerializer(user)
         expected_response = JSONRenderer().render(serializer.data)
         assert response.content == expected_response
+    
+    def test_create_view_when_exist_user(self, client, setup_db):
+        url = reverse('users_create')
+        response = client.post(url, {
+            'username': 'devid',
+            'email': 'devid@devid.com',
+            'password': 'devid3939!'
+        })
+        assert response.status_code == 403
+        assert response.content == JSONRenderer().render({'detail': 'User already exists'})
 
 @pytest.mark.django_db
 class TestGetUserDetailView:

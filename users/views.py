@@ -26,11 +26,16 @@ def users_create(request):
     validation = data_user_validation(data, expected_data)
     if validation != None:
         return Response({'detail': validation}, status = status.HTTP_400_BAD_REQUEST)
-    user = MyUser.objects.create_user(
-            username = request.data['username'],
-            email = request.data['email'],
-            password = request.data['password']
-    )
+    try:
+        MyUser.objects.get(email = request.data['email'])
+    except MyUser.DoesNotExist:
+        user = MyUser.objects.create_user(
+                username = request.data['username'],
+                email = request.data['email'],
+                password = request.data['password']
+        )
+    else:
+        return Response({'detail': 'User already exists'}, status = status.HTTP_403_FORBIDDEN)
     serializer = MyUserSerializer(user)
     return Response(serializer.data, status = status.HTTP_201_CREATED)
 
