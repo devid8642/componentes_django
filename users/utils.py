@@ -1,4 +1,5 @@
 from pytest import fixture
+from zoneinfo import ZoneInfo
 from users.models import MyUser
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -22,6 +23,9 @@ def data_user_validation(data, expected_data):
             return 'Usuário Inválido'
     
     return None
+
+def date_format(date):
+    return date.astimezone(ZoneInfo('America/Sao_Paulo')).isoformat()
 
 @fixture
 def setup_db(scope = 'class'):

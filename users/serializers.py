@@ -7,14 +7,14 @@ from .models import MyUser
 class MyUserSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only = True)
     username = serializers.CharField(max_length = 255)
-    email = serializers.CharField(max_length = 255)
+    email = serializers.EmailField(max_length = 255)
     password = serializers.CharField()
     is_active = serializers.BooleanField(default = True)
     is_staff = serializers.BooleanField(default = False)
     date_joined = serializers.DateTimeField(default = timezone.now, read_only = True)
 
     def create(self, **validated_data):
-        return MyUser.objects.create(**validated_data)
+        return MyUser.objects.create_user(**validated_data)
 
     def update(self, instance, **validated_data):
         instance.username = validated_data.get('username', instance.username)
