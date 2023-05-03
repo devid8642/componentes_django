@@ -5,8 +5,8 @@ from users.serializers import MyUserSerializer
 from users.utils import setup_db, date_format
 
 @pytest.mark.django_db
-class TestUserSerializer:
-    def test_serializer_an_instance(self, setup_db):
+class TestUserSerializing:
+    def test_user_serializer_with_an_instance(self, setup_db):
         user = MyUser.objects.get(id = 1)
         expected_dict = {
             'id': user.id,
@@ -20,7 +20,7 @@ class TestUserSerializer:
         serializer = MyUserSerializer(user)
         assert serializer.data == expected_dict
     
-    def test_serializer_multiple_instances(self, setup_db):
+    def test_user_serializer_with_multiple_instances(self, setup_db):
         users = MyUser.objects.all()
         expected_list = []
         expected_atributes = [
@@ -47,5 +47,29 @@ class TestUserSerializer:
 
 
 @pytest.mark.django_db
-class TestUserSerializerCreateAndUpdate:
-    pass
+class TestUserDesrializing:
+    def test_user_serializer_create(self):
+        data = {
+            'username': 'devid',
+            'email': 'devid@devid.com',
+            'password': 'devid3939!'
+        }
+        serializer = MyUserSerializer(data = data)
+        assert serializer.is_valid() == True
+        user = serializer.save()
+        assert user == MyUser.objects.get(email = 'devid@devid.com')
+
+    def test_user_serializer_update(self, setup_db):
+        data = {
+            'username': 'roberto',
+            'email': 'roberto@roberto.com',
+            'password': 'roberto3939!'
+        }
+        user = MyUser.objects.get(email = 'devid@devid.com')
+        serializer = MyUserSerializer(user, data = data)
+        assert serializer.is_valid() == True
+        user = serializer.save()
+        assert user == MyUser.objects.get(email = 'roberto@roberto.com')
+
+    def test_user_serialzier_validate(self):
+        pass
