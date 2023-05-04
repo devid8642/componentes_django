@@ -20,7 +20,7 @@ class MyUserSerializer(serializers.Serializer):
         except MyUser.DoesNotExist:
             return data
         else:
-            raise serializers.ValidationError('O usuário já existe')
+            raise serializers.ValidationError('O usuário já existe.')
 
     def create(self, validated_data):
         return MyUser.objects.create_user(

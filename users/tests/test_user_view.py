@@ -32,7 +32,7 @@ class TestUserListView:
 @pytest.mark.django_db
 class TestUserCreateView:
     def test_create_view(self, client):
-        url = reverse('users_create')
+        url = reverse('users_register')
         response = client.post(url, {
             'username': 'devid',
             'email': 'devid@devid.com',
@@ -45,14 +45,14 @@ class TestUserCreateView:
         assert response.content == expected_response
     
     def test_view_when_exist_user(self, client, setup_db):
-        url = reverse('users_create')
+        url = reverse('users_register')
         response = client.post(url, {
             'username': 'devid',
             'email': 'devid@devid.com',
             'password': 'devid3939!'
         })
-        assert response.status_code == 403
-        assert response.content == JSONRenderer().render({'detail': 'Usuário já existe.'})
+        assert response.status_code == 400
+        assert response.content == JSONRenderer().render({'non_field_errors': ['O usuário já existe.']})
 
 @pytest.mark.django_db
 class TestGetUserDetailView:
