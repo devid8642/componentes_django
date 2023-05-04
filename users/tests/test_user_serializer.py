@@ -6,7 +6,7 @@ from users.utils import setup_db, date_format
 
 @pytest.mark.django_db
 class TestUserSerializing:
-    def test_user_serializer_with_an_instance(self, setup_db):
+    def test_with_an_instance(self, setup_db):
         user = MyUser.objects.get(id = 1)
         expected_dict = {
             'id': user.id,
@@ -20,7 +20,7 @@ class TestUserSerializing:
         serializer = MyUserSerializer(user)
         assert serializer.data == expected_dict
     
-    def test_user_serializer_with_multiple_instances(self, setup_db):
+    def test_with_multiple_instances(self, setup_db):
         users = MyUser.objects.all()
         expected_list = []
         expected_atributes = [
@@ -48,7 +48,7 @@ class TestUserSerializing:
 
 @pytest.mark.django_db
 class TestUserDesrializing:
-    def test_user_serializer_create(self):
+    def test_create(self):
         data = {
             'username': 'devid',
             'email': 'devid@devid.com',
@@ -59,7 +59,7 @@ class TestUserDesrializing:
         user = serializer.save()
         assert user == MyUser.objects.get(email = 'devid@devid.com')
 
-    def test_user_serializer_update(self, setup_db):
+    def test_update(self, setup_db):
         data = {
             'username': 'roberto',
             'email': 'roberto@roberto.com',
@@ -71,5 +71,35 @@ class TestUserDesrializing:
         user = serializer.save()
         assert user == MyUser.objects.get(email = 'roberto@roberto.com')
 
-    def test_user_serialzier_validate(self):
-        pass
+    def test_validate(self, setup_db):
+        '''
+        possible_errors = [
+            'Este campo é obrigatório.',
+            'O usuário já existe.',
+            'Insira um endereço de email válido.',
+            'Esta senha é muito curta. Ela precisa conter pelo menos 8 caracteres.',
+            'Esta senha é inteiramente numérica.'
+        ]
+        '''
+        data1 = {}
+        data2 = {
+            'username': 'devid',
+            'email': 'devid',
+            'password': 'dd'
+        }
+        data3 = {
+            'password': '12345678'
+        }
+        data4 = {
+            'username': 'devid',
+            'email': 'devid@devid.com',
+            'password': 'devid3939!'
+        }
+        serializers = [
+            MyUserSerializer(data = data1),
+            MyUserSerializer(data = data2),
+            MyUserSerializer(data = data3),
+            MyUserSerializer(data = data4)
+        ]
+        for serializer in serializers:
+            assert serializer.is_valid() == False
