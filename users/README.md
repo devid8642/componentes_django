@@ -25,6 +25,10 @@ O <code>create</code> é método que é invocado quando o <code>serializer.save(
 Esse método atualiza os atributos da instância de <code>MyUser</code>, tomando o cuidado de criptografar a senha no processo e depois salva o usuário.
 
 ## User Views
+A API possui os seguintes endpoints:
 
-## Tests
-
+- /users/ (Lista todos os usuários, métodos HTTP: GET, permissões: administradores)
+- /users/<id:int> (Lida com as operações de read, update e delete de um usuário por id, métodos HTTP: GET, POST e DELETE, permissões: usuários autenticados e administradores)
+- /users/register/ (Salva um novo usuário no banco de dados, métodos HTTP: POST, permissões: qualquer usuário)
+- /login/ (Faz o login de um usuário com base no sistema de sessões do próprio django, métodos HTTP: POST, permissões: qualquer usuário)
+- /logout/ (Faz o logout de um usuário, métodos HTTP: GET e POST, permissões: qualquer usuário)
