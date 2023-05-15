@@ -28,7 +28,7 @@ def date_format(date):
     return date.astimezone(ZoneInfo('America/Sao_Paulo')).isoformat()
 
 @fixture
-def setup_db(scope = 'class'):
+def setup_users_on_db(scope = 'class'):
     MyUser.objects.create_user(
         username = 'devid',
         email = 'devid@devid.com',
